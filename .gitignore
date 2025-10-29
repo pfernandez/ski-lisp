@@ -7,3 +7,4 @@ pom.xml
 .nrepl-port
 .lein-repl-history
 .clj-kondo/
+.cpcache/

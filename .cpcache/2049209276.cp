@@ -1,1 +1,0 @@
-src:/home/paul/.m2/repository/org/clojure/clojure/1.12.3/clojure-1.12.3.jar:/home/paul/.m2/repository/org/clojure/core.specs.alpha/0.4.74/core.specs.alpha-0.4.74.jar:/home/paul/.m2/repository/org/clojure/spec.alpha/0.5.238/spec.alpha-0.5.238.jar
