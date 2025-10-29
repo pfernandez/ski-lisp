@@ -20,6 +20,12 @@
 (def TRUE K)
 (def FALSE (K I))
 (def IF (fn [b] (fn [t] (fn [e] ((b t) e)))))
+(def IFL
+  (fn [b]
+    (fn [t]
+      (fn [e]
+        ;; Lazy IF: t and e are 1-arg thunks; call only chosen one
+        (((b t) e) nil)))))
 
 ;; Numerals
 (def suc (S B))             ;; successor: suc n f x = f (n f x)
@@ -103,6 +109,32 @@
   (fn [m]
     (fn [n]
       (NOT ((leq n) m)))))
+
+;; =============================================
+;; Recursion (applicative-order fixpoint) and examples
+;; =============================================
+
+(def Z
+  (fn [f]
+    ((fn [x] (f (fn [v] ((x x) v))))
+     (fn [x] (f (fn [v] ((x x) v)))))))
+
+(def factorial
+  (Z (fn [recurse]
+       (fn [n]
+         (((IFL (is-zero n))
+           (fn [_] one))
+          (fn [_] ((mul n) (recurse (pred n)))))))))
+
+(def fibonacci
+  (Z (fn [recurse]
+       (fn [n]
+         (((IFL (is-zero n))
+           (fn [_] zero))
+          (fn [_]
+            (((IFL (is-zero (pred n)))
+              (fn [_] one))
+             (fn [_] ((plus (recurse (pred n))) (recurse (pred (pred n))))))))))))
 
 ;; =============================================
 ;; Lambda helpers (via bracket compiler)

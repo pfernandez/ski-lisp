@@ -43,6 +43,23 @@
   (println "[:a :b] ->"
            (s/church->seq ((s/CONS :a) ((s/CONS :b) s/NIL)))))
 
+(defn demo-predicates []
+  (heading "Numeral predicates and comparison")
+  (let [three (s/suc s/two)
+        four  (s/suc three)]
+    (println "pred two:" (s/church->int (s/pred s/two)))
+    (println "three - two:" (s/church->int ((s/minus three) s/two)))
+    (println "eq two two:" (s/church->bool ((s/eq s/two) s/two)))
+    (println "eq two three:" (s/church->bool ((s/eq s/two) three)))
+    (println "leq two three:" (s/church->bool ((s/leq s/two) three)))
+    (println "lt two two:" (s/church->bool ((s/lt s/two) s/two)))
+    (println "lt two four:" (s/church->bool ((s/lt s/two) four)))))
+
+(defn demo-recursion []
+  (heading "Recursion via Z (factorial, fibonacci)")
+  (println "factorial 5:" (s/church->int (s/factorial (s/int->church 5))))
+  (println "fibonacci 7:" (s/church->int (s/fibonacci (s/int->church 7)))))
+
 (defn demo-bracket []
   (heading "Bracket compiler: λ → SKI (with traces)")
 
@@ -74,4 +91,6 @@
 (defn -main [& _]
   (demo-rewrite)
   (demo-bridge)
+  (demo-predicates)
+  (demo-recursion)
   (demo-bracket))

@@ -64,6 +64,14 @@
     (is (= true  (s/church->bool ((s/lt s/two) three))))
     (is (= false (s/church->bool ((s/lt s/two) s/two))))))
 
+(deftest recursion-factorial-fibonacci
+  (is (= 1 (s/church->int (s/factorial s/zero))))
+  (is (= 1 (s/church->int (s/factorial s/one))))
+  (let [five (s/int->church 5)
+        seven (s/int->church 7)]
+    (is (= 120 (s/church->int (s/factorial five))))
+    (is (= 13  (s/church->int (s/fibonacci seven))))))
+
 (deftest lambda-wrappers
   ;; lambda->ski identity
   (is (= [:I] (s/lambda->ski (b/llam :x (b/lvar :x)))))
