@@ -49,6 +49,21 @@
   (is (= 5 (s/church->int (s/int->church 5))))
   (is (= 2 (s/church-fold s/two inc 0))))
 
+(deftest pred-minus-compare
+  (let [three (s/suc s/two)
+        four  (s/suc three)]
+    (is (= 0 (s/church->int (s/pred s/zero))))
+    (is (= 1 (s/church->int (s/pred s/two))))
+    (is (= 2 (s/church->int (s/pred three))))
+    (is (= 1 (s/church->int ((s/minus s/two) s/one))))
+    (is (= 0 (s/church->int ((s/minus s/two) three))))
+    (is (= true  (s/church->bool ((s/eq s/two) s/two))))
+    (is (= false (s/church->bool ((s/eq s/two) three))))
+    (is (= true  (s/church->bool ((s/leq s/two) three))))
+    (is (= false (s/church->bool ((s/leq four) three))))
+    (is (= true  (s/church->bool ((s/lt s/two) three))))
+    (is (= false (s/church->bool ((s/lt s/two) s/two))))))
+
 (deftest lambda-wrappers
   ;; lambda->ski identity
   (is (= [:I] (s/lambda->ski (b/llam :x (b/lvar :x)))))

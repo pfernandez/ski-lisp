@@ -96,6 +96,21 @@
      (println (format "%d:  %-2s  %s" (inc i) (name rule) (pretty term))))))
 
 ;; ---------------------------------
+;; Normalize to a (bounded) normal form
+;; ---------------------------------
+(defn normalize
+  "Reduce `t` by repeatedly applying `reduce-once` until no step is possible
+  or `limit` is reached. Returns the resulting term."
+  ([t] (normalize t 200))
+  ([t limit]
+   (loop [i 0 cur t]
+     (if (>= i limit)
+       cur
+       (if-let [{t' :term} (reduce-once cur)]
+         (recur (inc i) t')
+         cur)))))
+
+;; ---------------------------------
 ;; Reader-commented demo
 ;; ---------------------------------
 

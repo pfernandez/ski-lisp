@@ -3,10 +3,7 @@
             [ski-lisp.rewrite :as r]))
 
 (defn nf [t]
-  (loop [cur t]
-    (if-let [{:keys [term]} (r/reduce-once cur)]
-      (recur term)
-      cur)))
+  (r/normalize t 500))
 
 (deftest constructors-and-pretty
   (is (= [:S] (r/S)))
@@ -42,4 +39,3 @@
   (let [expr (r/ap* r/B* (r/var :f) (r/var :g) (r/var :x))
         expected (r/ap (r/var :f) (r/ap (r/var :g) (r/var :x)))]
     (is (= expected (nf expr)))))
-

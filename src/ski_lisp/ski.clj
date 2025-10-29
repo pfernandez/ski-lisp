@@ -68,6 +68,43 @@
   ((b true) false))
 
 ;; =============================================
+;; Numeral predicates and comparison
+;; =============================================
+
+;; Helper for predecessor via pairs
+(def PHI (fn [p]
+           ((PAIR (SND p)) (suc (SND p)))))
+
+(def pred
+  (fn [n]
+    (FST ((n PHI) ((PAIR zero) zero)))))
+
+(def minus
+  (fn [m]
+    (fn [n]
+      ((n pred) m))))
+
+;; Boolean combinators
+(def AND (fn [a] (fn [b] ((a b) FALSE))))
+(def OR  (fn [a] (fn [b] ((a TRUE) b))))
+(def NOT (fn [a] ((a FALSE) TRUE)))
+
+(def eq
+  (fn [m]
+    (fn [n]
+      ((AND (is-zero ((minus m) n))) (is-zero ((minus n) m))))))
+
+(def leq
+  (fn [m]
+    (fn [n]
+      (is-zero ((minus m) n)))))
+
+(def lt
+  (fn [m]
+    (fn [n]
+      (NOT ((leq n) m)))))
+
+;; =============================================
 ;; Lambda helpers (via bracket compiler)
 ;; =============================================
 
