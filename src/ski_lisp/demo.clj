@@ -21,6 +21,9 @@
 
   (heading "Successor shape: ((((S B) n) f) x) -> f (n f x)")
   (let [expr (r/ap* (r/S) r/B* (r/var :n) (r/var :f) (r/var :x))]
+    (r/trace expr 8))
+
+  (let [expr (r/ap* (r/S) r/B* (r/var :n) (r/var :f) (r/var :x))]
     (r/trace expr 8)))
 
 (defn demo-bridge []

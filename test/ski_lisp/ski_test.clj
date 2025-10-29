@@ -18,5 +18,32 @@
 
 (deftest church-lists
   (is (= [:a :b]
-         (s/church->seq ((s/CONS :a) ((s/CONS :b) s/NIL))))))
+         (s/church->seq ((s/CONS :a) ((s/CONS :b) s/NIL)))))
+  (is (= [] (s/church->seq s/NIL)))
+  (is (= [:x :y :z]
+         (s/church->seq (s/seq->church [:x :y :z])))))
 
+(deftest core-combinators
+  ;; I: returns its argument
+  (is (= 2 ((s/I inc) 1)))
+  ;; K: returns first, ignoring second
+  (is (= :x ((s/K :x) :y)))
+  ;; S: duplicates x into f and g
+  (is (= 2 (((s/S (s/K inc)) (s/K 1)) :ignored)))
+  ;; B: composition
+  (is (= 3 (((s/B inc) inc) 1)))
+  ;; W: duplicate argument to f
+  (is (= [42 42] ((s/W (fn [a] (fn [b] [a b]))) 42))))
+
+(deftest pairs-and-booleans
+  (let [p ((s/PAIR :a) :b)]
+    (is (= :a (s/FST p)))
+    (is (= :b (s/SND p))))
+  (is (= :t (((s/IF s/TRUE) :t) :e)))
+  (is (= :e (((s/IF s/FALSE) :t) :e)))
+  (is (= true (s/church->bool s/TRUE)))
+  (is (= false (s/church->bool s/FALSE))))
+
+(deftest bridges-and-folds
+  (is (= 5 (s/church->int (s/int->church 5))))
+  (is (= 2 (s/church-fold s/two inc 0))))
