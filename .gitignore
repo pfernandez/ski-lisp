@@ -1,0 +1,9 @@
+pom.xml
+*jar
+/lib/
+/classes/
+/target/
+.lsp/
+.nrepl-port
+.lein-repl-history
+.clj-kondo/
