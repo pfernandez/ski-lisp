@@ -68,6 +68,39 @@
   ((b true) false))
 
 ;; =============================================
+;; Lambda helpers (via bracket compiler)
+;; =============================================
+
+(defn lambda->ski
+  "Compile a λ-term (built with ski-lisp.bracket lvar/llam/lapp) to SKI AST.
+  Optional opts: {:eta? boolean} to enable eta-reduction.
+  Uses requiring-resolve to avoid a compile-time circular dependency."
+  ([lam]
+   ((requiring-resolve 'ski-lisp.bracket/compile-lam) lam))
+  ([lam opts]
+   ((requiring-resolve 'ski-lisp.bracket/compile-lam) lam opts)))
+
+(defn lambda->fn
+  "Compile a λ-term to a runnable Clojure function using SKI runtime.
+  Arities:
+  - (lambda->fn lam)             ; closed term
+  - (lambda->fn lam env)         ; open term, provide env {name -> value}
+  - (lambda->fn lam opts env)    ; with {:eta? bool} and env
+  Uses requiring-resolve to avoid a compile-time circular dependency."
+  ([lam]
+   (let [compile-lam (requiring-resolve 'ski-lisp.bracket/compile-lam)
+         eval-ski    (requiring-resolve 'ski-lisp.bracket/eval-ski)]
+     (eval-ski (compile-lam lam))))
+  ([lam env]
+   (let [compile-lam (requiring-resolve 'ski-lisp.bracket/compile-lam)
+         eval-ski    (requiring-resolve 'ski-lisp.bracket/eval-ski)]
+     (eval-ski (compile-lam lam) env)))
+  ([lam opts env]
+   (let [compile-lam (requiring-resolve 'ski-lisp.bracket/compile-lam)
+         eval-ski    (requiring-resolve 'ski-lisp.bracket/eval-ski)]
+     (eval-ski (compile-lam lam opts) env))))
+
+;; =============================================
 ;; REPL examples (reader-commented)
 ;; =============================================
 
@@ -85,3 +118,12 @@
 #_(church->bool (is-zero one))      ;=> false
 
 #_(church->seq ((CONS :a) ((CONS :b) NIL))) ;=> [:a :b]
+
+#_(do
+    (require '[ski-lisp.bracket :as b])
+    ;; λx.x compiled to SKI
+    (lambda->ski (b/llam :x (b/lvar :x)))    ;=> [:I]
+    ;; λx. f (g x) executed with env
+    (let [lam (b/llam :x (b/lapp (b/lvar :f) (b/lapp (b/lvar :g) (b/lvar :x))))
+          f   (lambda->fn lam {:f inc :g inc})]
+      (f 1)))                                 ;=> 3

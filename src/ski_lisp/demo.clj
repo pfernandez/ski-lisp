@@ -1,6 +1,7 @@
 (ns ski-lisp.demo
   (:require [ski-lisp.rewrite :as r]
-            [ski-lisp.ski :as s]))
+            [ski-lisp.ski :as s]
+            [ski-lisp.bracket :as b]))
 
 (defn heading [t]
   (println)
@@ -42,7 +43,35 @@
   (println "[:a :b] ->"
            (s/church->seq ((s/CONS :a) ((s/CONS :b) s/NIL)))))
 
+(defn demo-bracket []
+  (heading "Bracket compiler: λ → SKI (with traces)")
+
+  ;; Identity λx.x
+  (let [lam (b/llam :x (b/lvar :x))
+        ski (b/compile-lam lam)
+        app (r/ap ski (r/var :x))]
+    (println "λx.x  =>" (r/pretty ski))
+    (r/trace app 2))
+
+  ;; Composition λx. f (g x)
+  (let [lam (b/llam :x (b/lapp (b/lvar :f)
+                                (b/lapp (b/lvar :g) (b/lvar :x))))
+        ski (b/compile-lam lam)
+        app (r/ap ski (r/var :x))]
+    (println "λx. f (g x)  =>" (r/pretty ski))
+    (r/trace app 6))
+
+  ;; Church successor λn f x. f (n f x)
+  (let [lam (b/llam :n (b/llam :f (b/llam :x
+                                         (b/lapp (b/lvar :f)
+                                                 (b/lapp (b/lapp (b/lvar :n) (b/lvar :f))
+                                                         (b/lvar :x))))))
+        ski (b/compile-lam lam)
+        app (r/ap* ski (r/var :n) (r/var :f) (r/var :x))]
+    (println "λn f x. f (n f x)  =>" (r/pretty ski))
+    (r/trace app 10)))
+
 (defn -main [& _]
   (demo-rewrite)
-  (demo-bridge))
-
+  (demo-bridge)
+  (demo-bracket))

@@ -1,6 +1,7 @@
 (ns ski-lisp.ski-test
   (:require [clojure.test :refer :all]
-            [ski-lisp.ski :as s]))
+            [ski-lisp.ski :as s]
+            [ski-lisp.bracket :as b]))
 
 (deftest numerals-and-arith
   (is (= 0 (s/church->int s/zero)))
@@ -47,3 +48,14 @@
 (deftest bridges-and-folds
   (is (= 5 (s/church->int (s/int->church 5))))
   (is (= 2 (s/church-fold s/two inc 0))))
+
+(deftest lambda-wrappers
+  ;; lambda->ski identity
+  (is (= [:I] (s/lambda->ski (b/llam :x (b/lvar :x)))))
+  ;; lambda->fn closed term
+  (let [idf (s/lambda->fn (b/llam :x (b/lvar :x)))]
+    (is (= 42 (idf 42))))
+  ;; lambda->fn with env
+  (let [lam (b/llam :x (b/lapp (b/lvar :f) (b/lapp (b/lvar :g) (b/lvar :x))))
+        f   (s/lambda->fn lam {:f inc :g inc})]
+    (is (= 3 (f 1)))))

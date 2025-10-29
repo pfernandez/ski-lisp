@@ -1,6 +1,8 @@
 (ns ski-lisp.test-runner
   (:require [clojure.test :as t]
-            [ski-lisp.ski-test])
+            [ski-lisp.ski-test]
+            [ski-lisp.rewrite-test]
+            [ski-lisp.bracket-test])
   (:gen-class))
 
 (defn -main [& _]
@@ -10,4 +12,3 @@
       (shutdown-agents)
       (when (pos? (+ fail err))
         (System/exit 1)))))
-
