@@ -160,46 +160,45 @@
 ;; Eta reduction (optional optimization)
 ;; ==================================
 
-(defn eta-reduce
-  "Reduce the SKI eta pattern: (S (K M) I) → M. Applies recursively.
+  (defn eta-reduce
+    "Reduce the SKI eta pattern: (S (K M) I) → M. Applies recursively.
   Idempotent: safe to run multiple times."
-  [t]
-  (letfn [(ap? [x] (and (vector? x) (= :ap (first x))))
-          (step [term]
-            (let [[op a b] term]
-              (if (= op :ap)
-                (let [l (step a)
-                      r (step b)]
-                  (if (and (ap? l)
-                           (= [:S] (second l))
-                           (ap? (nth l 2))
-                           (= [:K] (second (nth l 2)))
-                           (= [:I] r))
+    [t]
+    (letfn [(ap? [x] (and (vector? x) (= :ap (first x))))
+            (step [term]
+              (let [[op a b] term]
+                (if (= op :ap)
+                  (let [l (step a)
+                        r (step b)]
+                    (if (and (ap? l)
+                             (= [:S] (second l))
+                             (ap? (nth l 2))
+                             (= [:K] (second (nth l 2)))
+                             (= [:I] r))
                     ;; Extract M from (K M)
-                    (nth (nth l 2) 2)
-                    [:ap l r]))
-                term)))]
-    (step t)))
+                      (nth (nth l 2) 2)
+                      [:ap l r]))
+                  term)))]
+      (step t)))
 
 ;; =============================
 ;; Reader-commented examples
 ;; =============================
 
-#_(do
+  #_(do
     ;; Identity: λx.x  →  I
-    (def id (compile-lam (llam :x (lvar :x))))
-    id                                        ;=> [:I]
+      (def id (compile-lam (llam :x (lvar :x))))
+      id                                        ;=> [:I]
 
     ;; Constant: λx.y  →  K y
-    (def konst (compile-lam (llam :x (lvar :y))))
-    konst                                     ;=> [:ap [:K] [:var :y]]
+      (def konst (compile-lam (llam :x (lvar :y))))
+      konst                                     ;=> [:ap [:K] [:var :y]]
 
     ;; Composition: λx. f (g x)   →   S (K f) (S (K g) I)
-    (def comp' (compile-lam (llam :x (lapp (lvar :f) (lapp (lvar :g) (lvar :x))))))
-    comp'
+      (def comp' (compile-lam (llam :x (lapp (lvar :f) (lapp (lvar :g) (lvar :x))))))
+      comp'
 
     ;; Successor (Church): λn f x. f (n f x)  →  ~ S B (after normalization)
-    (def suc' (compile-lam (llam :n (llam :f (llam :x (lapp (lvar :f)
-                                                          (lapp (lapp (lvar :n) (lvar :f)) (lvar :x))))))))
-    suc')
-  )
+      (def suc' (compile-lam (llam :n (llam :f (llam :x (lapp (lvar :f)
+                                                              (lapp (lapp (lvar :n) (lvar :f)) (lvar :x))))))))
+      suc'))
