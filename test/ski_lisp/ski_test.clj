@@ -1,6 +1,7 @@
 (ns ski-lisp.ski-test
   (:require [clojure.test :refer :all]
             [ski-lisp.ski :as s]
+            [ski-lisp.catalan :as cat]
             [ski-lisp.bracket :as b]))
 
 (deftest numerals-and-arith
@@ -24,17 +25,24 @@
   (is (= [:x :y :z]
          (s/church->seq (s/seq->church [:x :y :z])))))
 
+(def ^:private combinator-impls
+  [{:label "closure runtime" :I s/I :K s/K :S s/S}
+   {:label "pair collapse" :I cat/I :K cat/K :S cat/S}])
+
 (deftest core-combinators
-  ;; I: returns its argument
-  (is (= 2 ((s/I inc) 1)))
-  ;; K: returns first, ignoring second
-  (is (= :x ((s/K :x) :y)))
-  ;; S: duplicates x into f and g
-  (is (= 2 (((s/S (s/K inc)) (s/K 1)) :ignored)))
-  ;; B: composition
-  (is (= 3 (((s/B inc) inc) 1)))
-  ;; W: duplicate argument to f
-  (is (= [42 42] ((s/W (fn [a] (fn [b] [a b]))) 42))))
+  (doseq [{:keys [label I K S]} combinator-impls]
+    (testing (str label " I/K/S")
+      ;; I: returns its argument
+      (is (= 2 ((I inc) 1)))
+      ;; K: returns first, ignoring second
+      (is (= :x ((K :x) :y)))
+      ;; S: duplicates x into f and g
+      (is (= 2 (((S (K inc)) (K 1)) :ignored)))))
+  (testing "derived closure helpers"
+    ;; B: composition
+    (is (= 3 (((s/B inc) inc) 1)))
+    ;; W: duplicate argument to f
+    (is (= [42 42] ((s/W (fn [a] (fn [b] [a b]))) 42)))))
 
 (deftest pairs-and-booleans
   (let [p ((s/PAIR :a) :b)]
